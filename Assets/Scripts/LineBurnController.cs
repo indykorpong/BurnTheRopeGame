@@ -9,7 +9,8 @@ public class LineBurnController : MonoBehaviour
     public Transform linesTransform;
     public float burnSpeed = 1.5f;
 
-    private Polyline[] _lines;
+    private Polyline[] _polylines;
+    private PolylinePath[] _polylinePaths;
 
     private readonly List<List<Vector3>> _initialWaypointCollection = new();
     private readonly List<List<Vector3>> _burnWaypointCollection = new();
@@ -24,8 +25,8 @@ public class LineBurnController : MonoBehaviour
     
     private void Start()
     {
-        _lines = linesTransform.GetComponentsInChildren<Polyline>();
-        foreach (Polyline line in _lines)
+        _polylines = linesTransform.GetComponentsInChildren<Polyline>();
+        foreach (Polyline line in _polylines)
         {
             line.Color = new Color(0, 0, 0, 0);
             _initialWaypointCollection.Add(line.points.Select(x => x.point + line.transform.position).ToList());
@@ -39,6 +40,14 @@ public class LineBurnController : MonoBehaviour
             _burnPoints.Add(waypoints[^1]);
             _isLineBurnings.Add(false);
         }
+
+        _polylinePaths = new PolylinePath[_polylines.Length];
+        for (int i = 0; i < _polylinePaths.Length; i++)
+        {
+            _polylinePaths[i] = new PolylinePath();
+        }
+        
+        Camera.onPreRender += DrawLines;
     }
 
     private void Update()
@@ -53,8 +62,6 @@ public class LineBurnController : MonoBehaviour
 
             BurnLines();
         }
-
-        DrawLines();
 
         if (Input.GetKeyDown(KeyCode.R)) ResetLines();
     }
@@ -89,8 +96,6 @@ public class LineBurnController : MonoBehaviour
                 _burnWaypointCollection[i][_currentWaypointIndices[i]] = _initialWaypointCollection[i][_nextWaypointIndices[i]];
                 _burnPoints[i] = _initialWaypointCollection[i][_nextWaypointIndices[i]];
             
-                DrawLines();
-
                 _burnWaypointCollection[i].RemoveAt(_currentWaypointIndices[i]);
             
                 _currentWaypointIndices[i]--;
@@ -135,9 +140,9 @@ public class LineBurnController : MonoBehaviour
         return x / y;
     }
 
-    private void DrawLines()
+    private void DrawLines(Camera cam)
     {
-        using (Draw.Command(Camera.main))
+        using (Draw.Command(cam))
         {
             for (int i = 0; i < _burnWaypointCollection.Count; i++)
             {
@@ -147,9 +152,10 @@ public class LineBurnController : MonoBehaviour
                     _isLineBurnings[i] = false;
                     continue;
                 }
-                
-                var p = new PolylinePath();
-                p.AddPoints(points, Color.black);
+
+                var p = _polylinePaths[i];
+                p.ClearAllPoints();
+                p.AddPoints(points);
                 Draw.Polyline(p, false, 0.125f, Color.black);
             }
         }
@@ -163,7 +169,7 @@ public class LineBurnController : MonoBehaviour
         _nextWaypointIndices.Clear();
         _burnPoints.Clear();
 
-        foreach (Polyline line in _lines)
+        foreach (Polyline line in _polylines)
         {
             _initialWaypointCollection.Add(line.points.Select(x => x.point + line.transform.position).ToList());
         }
