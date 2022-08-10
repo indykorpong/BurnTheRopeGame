@@ -70,7 +70,7 @@ namespace BurnTheRope
                 
                 using (Draw.Command(cam))
                 {
-                    Draw.Disc(_mousePos, Quaternion.identity, 0.2f, Color.red);
+                    Draw.Disc(_mousePos, Quaternion.identity, CLICK_POINT_RADIUS, Color.red);
                 }
             }
         }

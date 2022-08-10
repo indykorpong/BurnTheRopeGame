@@ -88,7 +88,7 @@ namespace BurnTheRope.Geometry
         public bool BurnLines(Vector3 clickPoint)
         {
             (Vector3 burnPoint, int lineIndex) = GetNearestPointOnPath(clickPoint);
-            if (lineIndex == -1 || Vector3.Distance(burnPoint, clickPoint) > ClickToBurnController.CLICK_POINT_RADIUS) return false;
+            if (lineIndex == -1 || Vector3.Distance(burnPoint, clickPoint) > LineBurnController.CLICK_POINT_RADIUS) return false;
             
             _leftBurnPoint = burnPoint;
             _rightBurnPoint = burnPoint;
