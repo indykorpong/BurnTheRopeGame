@@ -7,26 +7,33 @@ namespace BurnTheRope.Geometry
 {
     public class WaypointPath
     {
-        private readonly List<Vector3> _waypoints = new List<Vector3>();
-        private List<Line> _lines = new List<Line>();
+        private readonly List<Vector3> _waypoints;
+        private List<Line> _lines;
+        private List<Line> _cachedLines;
 
         // Construct waypoint path from a list of continuous points
         // as in the line you will draw contains this list of continuous points.
         public WaypointPath(List<Vector3> positions)
         {
             _waypoints = positions;
-            
             _lines = new List<Line>();
+            _cachedLines = new List<Line>();
+
             CalculateLines();
         }
 
         private void CalculateLines()
         {
             _lines.Clear();
+            _cachedLines.Clear();
+            
             for (int i = 0; i < _waypoints.Count - 1; i++)
             {
                 Line line = new Line(_waypoints[i], _waypoints[i + 1]);
                 _lines.Add(line);
+                
+                Line cachedLine = new Line(_waypoints[i], _waypoints[i + 1]);
+                _cachedLines.Add(cachedLine);
             }
         }
 
@@ -42,28 +49,18 @@ namespace BurnTheRope.Geometry
             }
         }
 
-        private void AddPointOnPath(Vector3 point, int lineIndex)
+        private void AddPointOnPath(ref List<Line> lines, Vector3 point, int lineIndex)
         {
-            Line[] newLineArray = new Line[_lines.Count];
-            _lines.CopyTo(newLineArray);
+            Line[] newLineArray = new Line[lines.Count];
+            lines.CopyTo(newLineArray);
 
             List<Line> newLineList = new List<Line>();
-            newLineList.AddRange(_lines.GetRange(0, lineIndex));
-            newLineList.Add(new Line(_lines[lineIndex].start, point));
-            newLineList.Add(new Line(point, _lines[lineIndex].end));
-            newLineList.AddRange(_lines.GetRange(lineIndex + 1, _lines.Count - lineIndex - 1));
+            newLineList.AddRange(lines.GetRange(0, lineIndex));
+            newLineList.Add(new Line(lines[lineIndex].start, point));
+            newLineList.Add(new Line(point, lines[lineIndex].end));
+            newLineList.AddRange(lines.GetRange(lineIndex + 1, lines.Count - lineIndex - 1));
 
-            _lines = newLineList;
-        }
-
-        public void RemoveLine(int index)
-        {
-            if (_lines.Count <= index)
-            {
-                Debug.LogWarning("Cannot remove the line at the index: " + index);
-                return;
-            }
-            _lines.RemoveAt(index);
+            lines = newLineList;
         }
 
         private Vector3? _clickPoint;
@@ -76,7 +73,7 @@ namespace BurnTheRope.Geometry
         private Vector3 _rightBurnPoint;
 
         private const float DISTANCE_ERROR = LineBurnController.CLICK_POINT_RADIUS;
-        private const float BURN_SPEED = 1f;
+        private const float BURN_SPEED = 3f;
         private const float LEFT_THRESHOLD = 0.001f;
         private const float RIGHT_THRESHOLD = 0.999f;
         private const float DIST_THRESHOLD = 0.001f;
@@ -101,7 +98,8 @@ namespace BurnTheRope.Geometry
             _leftFinishedBurning = false;
             _rightFinishedBurning = false;
 
-            AddPointOnPath(burnPoint, lineIndex);
+            AddPointOnPath(ref _lines, burnPoint, lineIndex);
+            AddPointOnPath(ref _cachedLines, burnPoint, lineIndex);
 
             _leftCurrentIndex = lineIndex;
             _rightCurrentIndex = lineIndex + 1;
@@ -133,13 +131,17 @@ namespace BurnTheRope.Geometry
                  * set isVisible of the current line to false,
                  * and decrement the current waypoint index.
                  */
-                if (InverseLerp(_lines[_leftCurrentIndex].start, _lines[_leftCurrentIndex].end, _leftBurnPoint) <
+                if (InverseLerp(_cachedLines[_leftCurrentIndex].start, _cachedLines[_leftCurrentIndex].end, _leftBurnPoint) <
                     LEFT_THRESHOLD)
                 {
                     _leftBurnPoint = _lines[_leftCurrentIndex].start;
                     _lines[_leftCurrentIndex].isVisible = false;
 
                     _leftCurrentIndex--;
+                    if (_leftCurrentIndex >= 0)
+                    {
+                        _leftBurnPoint = _lines[_leftCurrentIndex].end;
+                    }
                 }
             }
 
@@ -155,13 +157,17 @@ namespace BurnTheRope.Geometry
                     BURN_SPEED * Time.deltaTime);
                 _lines[_rightCurrentIndex].start = _rightBurnPoint;
 
-                if (InverseLerp(_lines[_rightCurrentIndex].start, _lines[_rightCurrentIndex].end, _rightBurnPoint) >
+                if (InverseLerp(_cachedLines[_rightCurrentIndex].start, _cachedLines[_rightCurrentIndex].end, _rightBurnPoint) >
                     RIGHT_THRESHOLD)
                 {
                     _rightBurnPoint = _lines[_rightCurrentIndex].end;
                     _lines[_rightCurrentIndex].isVisible = false;
 
                     _rightCurrentIndex++;
+                    if (_rightCurrentIndex < _lines.Count)
+                    {
+                        _rightBurnPoint = _lines[_rightCurrentIndex].start;
+                    }
                 }
             }
 
