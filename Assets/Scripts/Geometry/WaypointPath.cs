@@ -66,14 +66,17 @@ namespace BurnTheRope.Geometry
             _lines.RemoveAt(index);
         }
 
+        private Vector3? _clickPoint;
+
         private int _leftCurrentIndex;
         private Vector3 _leftBurnPoint;
 
         private int _rightCurrentIndex;
         private int _rightNextIndex;
         private Vector3 _rightBurnPoint;
-        
-        private const float BURN_SPEED = 5f;
+
+        private const float DISTANCE_ERROR = LineBurnController.CLICK_POINT_RADIUS;
+        private const float BURN_SPEED = 1f;
         private const float LEFT_THRESHOLD = 0.001f;
         private const float RIGHT_THRESHOLD = 0.999f;
         private const float DIST_THRESHOLD = 0.001f;
@@ -81,44 +84,63 @@ namespace BurnTheRope.Geometry
         private bool _leftFinishedBurning;
         private bool _rightFinishedBurning;
 
-        /*
-         * Returns true if the click point is near the lines enough and the lines have finished burning.
-         * Returns false if the click point is too far from the lines.
-         */
-        public bool BurnLines(Vector3 clickPoint)
+        public void SetBurnPoint(Vector3 mousePos)
         {
-            (Vector3 burnPoint, int lineIndex) = GetNearestPointOnPath(clickPoint);
-            if (lineIndex == -1 || Vector3.Distance(burnPoint, clickPoint) > LineBurnController.CLICK_POINT_RADIUS) return false;
+            _clickPoint = mousePos;
             
+            (Vector3 burnPoint, int lineIndex, float distance) = GetNearestPointOnPath(_clickPoint.Value);
+            if (lineIndex == -1 || distance > DISTANCE_ERROR)
+            {
+                _clickPoint = null;
+                return;
+            }
+
             _leftBurnPoint = burnPoint;
             _rightBurnPoint = burnPoint;
+
+            _leftFinishedBurning = false;
+            _rightFinishedBurning = false;
 
             AddPointOnPath(burnPoint, lineIndex);
 
             _leftCurrentIndex = lineIndex;
             _rightCurrentIndex = lineIndex + 1;
+        }
 
+        /*
+         * Returns true if the click point is near the lines enough and the lines have finished burning.
+         * Returns false if the click point is too far from the lines.
+         */
+        public bool BurnLines()
+        {
+            if (_clickPoint == null) return false;
+            
             // Left side
             if (Vector3.Distance(_leftBurnPoint, _lines[0].start) < DIST_THRESHOLD)
             {
                 _leftFinishedBurning = true;
             }
 
-            _leftBurnPoint = Vector3.MoveTowards(_leftBurnPoint, _lines[_leftCurrentIndex].start, BURN_SPEED * Time.deltaTime);
-
-            /*
-             * If the current burn point reached the next waypoint,
-             * then set the position of the burn point to the position of the next waypoint,
-             * set isVisible of the current line to false,
-             * and decrement the current waypoint index.
-             */
-            if (InverseLerp(_lines[_leftCurrentIndex].start, _lines[_leftCurrentIndex].end, _leftBurnPoint) <
-                LEFT_THRESHOLD)
+            if (!_leftFinishedBurning)
             {
-                _leftBurnPoint = _lines[_leftCurrentIndex].start;
-                _lines[_leftCurrentIndex].isVisible = false;
+                _leftBurnPoint = Vector3.MoveTowards(_leftBurnPoint, _lines[_leftCurrentIndex].start,
+                    BURN_SPEED * Time.deltaTime);
+                _lines[_leftCurrentIndex].end = _leftBurnPoint;
 
-                _leftCurrentIndex--;
+                /*
+                 * If the current burn point reached the next waypoint,
+                 * then set the position of the burn point to the position of the next waypoint,
+                 * set isVisible of the current line to false,
+                 * and decrement the current waypoint index.
+                 */
+                if (InverseLerp(_lines[_leftCurrentIndex].start, _lines[_leftCurrentIndex].end, _leftBurnPoint) <
+                    LEFT_THRESHOLD)
+                {
+                    _leftBurnPoint = _lines[_leftCurrentIndex].start;
+                    _lines[_leftCurrentIndex].isVisible = false;
+
+                    _leftCurrentIndex--;
+                }
             }
 
             // Right side
@@ -126,24 +148,29 @@ namespace BurnTheRope.Geometry
             {
                 _rightFinishedBurning = true;
             }
-            
-            _rightBurnPoint = Vector3.MoveTowards(_rightBurnPoint, _lines[_rightCurrentIndex].end, BURN_SPEED * Time.deltaTime);
 
-            if (InverseLerp(_lines[_rightCurrentIndex].start, _lines[_rightCurrentIndex].end, _rightBurnPoint) >
-                RIGHT_THRESHOLD)
+            if (!_rightFinishedBurning)
             {
-                _rightBurnPoint = _lines[_rightCurrentIndex].end;
-                _lines[_rightCurrentIndex].isVisible = false;
+                _rightBurnPoint = Vector3.MoveTowards(_rightBurnPoint, _lines[_rightCurrentIndex].end,
+                    BURN_SPEED * Time.deltaTime);
+                _lines[_rightCurrentIndex].start = _rightBurnPoint;
 
-                _rightCurrentIndex++;
+                if (InverseLerp(_lines[_rightCurrentIndex].start, _lines[_rightCurrentIndex].end, _rightBurnPoint) >
+                    RIGHT_THRESHOLD)
+                {
+                    _rightBurnPoint = _lines[_rightCurrentIndex].end;
+                    _lines[_rightCurrentIndex].isVisible = false;
+
+                    _rightCurrentIndex++;
+                }
             }
 
             return _leftFinishedBurning && _rightFinishedBurning;
         }
 
-        private (Vector3, int) GetNearestPointOnPath(Vector3 clickPoint)
+        private (Vector3, int, float) GetNearestPointOnPath(Vector3 clickPoint)
         {
-            float distance = float.MaxValue;
+            float nearestDistance = float.MaxValue;
             Vector3 nearestPoint = Vector3.zero;
             int nearestIndex = -1;
 
@@ -167,14 +194,16 @@ namespace BurnTheRope.Geometry
                 float zi = clickPoint.z;
                 Vector3 point = new Vector3(xi, yi, zi);
 
-                if (Vector3.Distance(clickPoint, point) < distance)
+                float distance = Vector3.Distance(clickPoint, point);
+                if (distance < nearestDistance)
                 {
+                    nearestDistance = distance;
                     nearestPoint = point;
                     nearestIndex = i;
                 }
             }
 
-            return (nearestPoint, nearestIndex);
+            return (nearestPoint, nearestIndex, nearestDistance);
         }
         
         private float InverseLerp(Vector3 a, Vector3 b, Vector3 v)

@@ -26,7 +26,15 @@ namespace BurnTheRope.Geometry
             }
         }
 
-        public bool BurnWaypointPaths(Vector3 clickPoint)
+        public void SetBurnPoint(Vector3 mousePos)
+        {
+            foreach (WaypointPath waypointPath in _waypointPaths)
+            {
+                waypointPath.SetBurnPoint(mousePos);
+            }
+        }
+
+        public bool BurnWaypointPaths()
         {
             bool[] finishedBurnings = new bool[_waypointPaths.Count];
             for (int i = 0; i < finishedBurnings.Length; i++)
@@ -37,7 +45,7 @@ namespace BurnTheRope.Geometry
             for (int i = 0; i < _waypointPaths.Count; i++)
             {
                 if (finishedBurnings[i]) continue;
-                finishedBurnings[i] = _waypointPaths[i].BurnLines(clickPoint);
+                finishedBurnings[i] = _waypointPaths[i].BurnLines();
             }
 
             return finishedBurnings.All(x => x);
