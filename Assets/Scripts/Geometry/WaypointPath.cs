@@ -5,11 +5,12 @@ using UnityEngine;
 
 namespace BurnTheRope.Geometry
 {
+    // TODO: Migrate from using this to using `Path` class
     public class WaypointPath
     {
         private readonly List<Vector3> _waypoints;
-        private List<Line> _lines;
-        private List<Line> _cachedLines;
+        private List<Line> _lines;          // lines to burn
+        private List<Line> _cachedLines;    // invisible lines that are not burned and are copied from `_lines`
 
         // Construct waypoint path from a list of continuous points
         // as in the line you will draw contains this list of continuous points.
@@ -63,6 +64,17 @@ namespace BurnTheRope.Geometry
             lines = newLineList;
         }
 
+        private void RemovePointAtIndex(ref List<Line> lines, int index)
+        {
+            Line[] newLineArray = new Line[lines.Count];
+            lines.CopyTo(newLineArray);
+
+            List<Line> newLineList = new List<Line>();
+            newLineList.RemoveAt(index);
+
+            lines = newLineList;
+        }
+
         private Vector3? _clickPoint;
 
         private int _leftCurrentIndex;
@@ -72,7 +84,7 @@ namespace BurnTheRope.Geometry
         private int _rightNextIndex;
         private Vector3 _rightBurnPoint;
 
-        private const float DISTANCE_ERROR = LineBurnController.CLICK_POINT_RADIUS;
+        private const float DISTANCE_ERROR = LineDrawer.CLICK_POINT_RADIUS;
         private const float BURN_SPEED = 3f;
         private const float LEFT_THRESHOLD = 0.001f;
         private const float RIGHT_THRESHOLD = 0.999f;

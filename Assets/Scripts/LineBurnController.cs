@@ -10,9 +10,8 @@ namespace BurnTheRope
 {
     public class LineBurnController : MonoBehaviour
     {
-        public Transform polylineTransforms;
+        public LineDrawer lineDrawer;
 
-        private WaypointPath _waypointPath;
         private WaypointPathCollection _waypointPathCollection;
 
         private Camera _camera;
@@ -21,24 +20,9 @@ namespace BurnTheRope
         private bool _clicked;
         private bool _finishedBurning;
 
-        public const float CLICK_POINT_RADIUS = 0.2f;
-
         private void Start()
         {
-            var polylines = polylineTransforms.GetComponentsInChildren<Polyline>();
-            _waypointPathCollection = new WaypointPathCollection();
-
-            foreach (Polyline polyline in polylines)
-            {
-                var pointList = polyline.points.Select(x => x.point + polyline.transform.position).ToList();
-                polyline.gameObject.SetActive(false);
-
-                _waypointPath = new WaypointPath(pointList);
-                _waypointPathCollection.AddWaypointPath(_waypointPath);
-            }
-
-            Camera.onPreRender += _waypointPathCollection.DrawWaypointPaths;
-            Camera.onPreRender += DrawClickPoint;
+            _waypointPathCollection = lineDrawer.WaypointPathCollection;
 
             _camera = FindObjectOfType<Camera>();
             _mousePos = new Vector3(0, 0, -20);
@@ -66,14 +50,6 @@ namespace BurnTheRope
             {
                 _clicked = false;
                 _finishedBurning = false;
-            }
-        }
-
-        private void DrawClickPoint(Camera cam)
-        {
-            using (Draw.Command(cam))
-            {
-                Draw.Disc(_mousePos, Quaternion.identity, CLICK_POINT_RADIUS, Color.red);
             }
         }
 
