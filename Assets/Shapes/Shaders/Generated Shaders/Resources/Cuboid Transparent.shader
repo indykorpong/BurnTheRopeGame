@@ -8,9 +8,11 @@ Shader "Shapes/Cuboid Transparent" {
 		_StencilID ("Stencil ID", int) = 0
 		_StencilReadMask ("Stencil Read Mask", int) = 255
 		_StencilWriteMask ("Stencil Write Mask", int) = 255
+		_ColorMask ("Color Mask", int) = 15
 	}
 	SubShader {
 		Tags {
+			"ForceNoShadowCasting" = "True"
 			"IgnoreProjector" = "True"
 			"Queue" = "Transparent"
 			"RenderType" = "Transparent"
@@ -27,6 +29,7 @@ Shader "Shapes/Cuboid Transparent" {
 			Cull Off
 			ZTest [_ZTest]
 			Offset [_ZOffsetFactor], [_ZOffsetUnits]
+			ColorMask [_ColorMask]
 			ZWrite Off
 			Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
 			HLSLPROGRAM

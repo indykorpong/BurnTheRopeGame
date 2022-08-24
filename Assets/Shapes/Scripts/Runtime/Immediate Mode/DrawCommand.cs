@@ -115,6 +115,7 @@ namespace Shapes {
 		internal int id;
 		bool pushPopState;
 		Camera cam;
+		internal readonly List<int> cachedTextIds = new List<int>();
 		internal readonly List<Object> cachedAssets = new List<Object>();
 		internal readonly List<DisposableMesh> cachedMeshes = new List<DisposableMesh>();
 		internal readonly List<ShapeDrawCall> drawCalls = new List<ShapeDrawCall>();
@@ -167,6 +168,9 @@ namespace Shapes {
 		}
 
 		void CleanupCachedAssetsAndMeshes() {
+			foreach( int i in cachedTextIds )
+				ShapesTextPool.Instance.ReleaseElement( i );
+			cachedTextIds.Clear();
 			foreach( Object asset in cachedAssets )
 				asset.DestroyBranched();
 			cachedAssets.Clear();

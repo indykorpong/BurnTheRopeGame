@@ -8,9 +8,11 @@ Shader "Shapes/Triangle Opaque" {
 		_StencilID ("Stencil ID", int) = 0
 		_StencilReadMask ("Stencil Read Mask", int) = 255
 		_StencilWriteMask ("Stencil Write Mask", int) = 255
+		_ColorMask ("Color Mask", int) = 15
 	}
 	SubShader {
 		Tags {
+			"ForceNoShadowCasting" = "True"
 			"IgnoreProjector" = "True"
 			"Queue" = "AlphaTest"
 			"RenderType" = "TransparentCutout"
@@ -27,6 +29,7 @@ Shader "Shapes/Triangle Opaque" {
 			Cull Off
 			ZTest [_ZTest]
 			Offset [_ZOffsetFactor], [_ZOffsetUnits]
+			ColorMask [_ColorMask]
 			AlphaToMask On
 			HLSLPROGRAM
 				#pragma vertex vert

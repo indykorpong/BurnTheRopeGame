@@ -81,7 +81,8 @@ namespace Shapes {
 				Draw.FontSize = fontScale;
 				Vector2 labelPos = a + dir * percentLabelOffset;
 				string pct = Mathf.RoundToInt( t * 100 ) + "%";
-				Draw.Text( labelPos, angRad + ShapesMath.TAU / 2, pct, TextAlign.Right );
+				Quaternion rotation = Quaternion.Euler( 0, 0, ( angRad + ShapesMath.TAU / 2 ) * Mathf.Rad2Deg );
+				Draw.Text( labelPos, rotation, pct, TextAlign.Right );
 			}
 
 			// moving dot

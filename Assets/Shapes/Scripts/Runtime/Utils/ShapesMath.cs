@@ -84,7 +84,9 @@ namespace Shapes {
 
 
 		[MethodImpl( INLINE )] static Vector2 Lerp( Vector2 a, Vector2 b, Vector2 t ) => new Vector2( Mathf.Lerp( a.x, b.x, t.x ), Mathf.Lerp( a.y, b.y, t.y ) );
+		[MethodImpl( INLINE )] public static Vector2 Lerp( Rect r, Vector2 t ) => new Vector2( Mathf.Lerp( r.xMin, r.xMax, t.x ), Mathf.Lerp( r.yMin, r.yMax, t.y ) );
 		[MethodImpl( INLINE )] static Vector2 InverseLerp( Vector2 a, Vector2 b, Vector2 v ) => ( v - a ) / ( b - a );
+		[MethodImpl( INLINE )] public static Vector2 InverseLerp( Rect r, Vector2 pt ) => new Vector2( Mathf.InverseLerp( r.xMin, r.xMax, pt.x ), Mathf.InverseLerp( r.yMin, r.yMax, pt.y ) );
 		[MethodImpl( INLINE )] static Vector2 Remap( Vector2 iMin, Vector2 iMax, Vector2 oMin, Vector2 oMax, Vector2 value ) => Lerp( oMin, oMax, InverseLerp( iMin, iMax, value ) );
 		[MethodImpl( INLINE )] public static Vector2 Remap( Rect iRect, Rect oRect, Vector2 iPos ) => Remap( iRect.min, iRect.max, oRect.min, oRect.max, iPos );
 

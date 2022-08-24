@@ -34,9 +34,11 @@ namespace Shapes {
 
 		public static void ApplyDefaultGlobalProperties( Material mat ) {
 			// set default properties
-			mat.SetInt( ShapesMaterialUtils.propZTest, (int)CompareFunction.LessEqual );
-			mat.SetFloat( ShapesMaterialUtils.propZOffsetFactor, 0f );
-			mat.SetInt( ShapesMaterialUtils.propZOffsetUnits, 0 );
+			// todo: this seeeems unnecessary, not sure why this exists
+			mat.SetInt_Shapes( ShapesMaterialUtils.propZTest, (int)ShapeRenderer.DEFAULT_ZTEST );
+			mat.SetFloat( ShapesMaterialUtils.propZOffsetFactor, ShapeRenderer.DEFAULT_ZOFS_FACTOR );
+			mat.SetInt_Shapes( ShapesMaterialUtils.propZOffsetUnits, ShapeRenderer.DEFAULT_ZOFS_UNITS );
+			mat.SetInt_Shapes( ShapesMaterialUtils.propColorMask, (int)ShapeRenderer.DEFAULT_COLOR_MASK );
 		}
 
 		static Material CreateShapesMaterial( Shader shader, HideFlags hideFlags, params string[] keywords ) {

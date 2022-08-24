@@ -93,7 +93,8 @@ namespace Shapes {
 				bool makeJoin = closed || ( !isLast && !isFirst );
 				bool isEndpoint = closed == false && ( isFirst || isLast );
 				float uvEndpointValue = isEndpoint ? ( isFirst ? -1 : 1 ) : 0;
-				void SetUv0( int id, float x, float y ) => meshUv0[id] = new Vector4( x, y, uvEndpointValue, path[i].thickness );
+				float pathThickness = path[i].thickness;
+				void SetUv0( Vector4[] uvArr, float uvEndpointVal, float pathThicc, int id, float x, float y ) => uvArr[id] = new Vector4( x, y, uvEndpointVal, pathThicc );
 
 
 				// Indices & verts
@@ -193,26 +194,26 @@ namespace Shapes {
 				}
 
 				if( separateJoinMesh ) {
-					SetUv0( iv0, 0, 0 );
-					SetUv0( iv1, -1, -1 );
-					SetUv0( iv2, -1, 1 );
-					SetUv0( iv3, 1, -1 );
-					SetUv0( iv4, 1, 1 );
+					SetUv0( meshUv0, uvEndpointValue, pathThickness, iv0, 0, 0 );
+					SetUv0( meshUv0, uvEndpointValue, pathThickness, iv1, -1, -1 );
+					SetUv0( meshUv0, uvEndpointValue, pathThickness, iv2, -1, 1 );
+					SetUv0( meshUv0, uvEndpointValue, pathThickness, iv3, 1, -1 );
+					SetUv0( meshUv0, uvEndpointValue, pathThickness, iv4, 1, 1 );
 					if( makeJoin ) {
-						SetUv0( ivj0, 0, 0 );
+						SetUv0( meshUv0, uvEndpointValue, pathThickness, ivj0, 0, 0 );
 						if( isSimpleJoin ) {
-							SetUv0( ivj1, 1, -1 );
-							SetUv0( ivj2, 1, 1 );
+							SetUv0( meshUv0, uvEndpointValue, pathThickness, ivj1, 1, -1 );
+							SetUv0( meshUv0, uvEndpointValue, pathThickness, ivj2, 1, 1 );
 						} else {
-							SetUv0( ivj1, 1, -1 );
-							SetUv0( ivj2, -1, -1 );
-							SetUv0( ivj3, -1, 1 );
-							SetUv0( ivj4, 1, 1 );
+							SetUv0( meshUv0, uvEndpointValue, pathThickness, ivj1, 1, -1 );
+							SetUv0( meshUv0, uvEndpointValue, pathThickness, ivj2, -1, -1 );
+							SetUv0( meshUv0, uvEndpointValue, pathThickness, ivj3, -1, 1 );
+							SetUv0( meshUv0, uvEndpointValue, pathThickness, ivj4, 1, 1 );
 						}
 					}
 				} else {
-					SetUv0( iv0, -1, i );
-					SetUv0( iv1, 1, i );
+					SetUv0( meshUv0, uvEndpointValue, pathThickness, iv0, -1, i );
+					SetUv0( meshUv0, uvEndpointValue, pathThickness, iv1, 1, i );
 				}
 
 

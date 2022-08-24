@@ -52,6 +52,8 @@ namespace Shapes {
 			ObjectPool<MaterialPropertyBlock>.Free( mpb );
 			if( instanced )
 				ArrayPool<Matrix4x4>.Free( matrices );
+			drawState.mat = null; // to ensure we don't have references to assets lying around
+			drawState.mesh = null;
 		}
 
 	}

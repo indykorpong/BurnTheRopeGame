@@ -8,10 +8,12 @@ Shader "Shapes/Texture Lighten" {
 		_StencilID ("Stencil ID", int) = 0
 		_StencilReadMask ("Stencil Read Mask", int) = 255
 		_StencilWriteMask ("Stencil Write Mask", int) = 255
+		_ColorMask ("Color Mask", int) = 15
 		_MainTex ("Texture", 2D) = "white" {}
 	}
 	SubShader {
 		Tags {
+			"ForceNoShadowCasting" = "True"
 			"IgnoreProjector" = "True"
 			"Queue" = "Transparent"
 			"RenderType" = "Transparent"
@@ -28,6 +30,7 @@ Shader "Shapes/Texture Lighten" {
 			Cull Off
 			ZTest [_ZTest]
 			Offset [_ZOffsetFactor], [_ZOffsetUnits]
+			ColorMask [_ColorMask]
 			ZWrite Off
 			BlendOp Max
 			Blend One One

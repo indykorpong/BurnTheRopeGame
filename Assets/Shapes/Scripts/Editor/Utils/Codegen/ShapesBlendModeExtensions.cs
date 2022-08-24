@@ -43,6 +43,7 @@ namespace Shapes {
 			yield return "Cull Off";
 			yield return "ZTest [_ZTest]";
 			yield return "Offset [_ZOffsetFactor], [_ZOffsetUnits]";
+			yield return "ColorMask [_ColorMask]";
 			if( blendMode.ZWrite() == false )
 				yield return "ZWrite Off";
 			if( blendMode.AlphaToMask() )

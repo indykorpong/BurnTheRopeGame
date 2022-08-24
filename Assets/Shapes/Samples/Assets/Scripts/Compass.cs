@@ -43,7 +43,7 @@ namespace Shapes {
 
 			// draw the look angle label
 			Draw.FontSize = fontSizeLookLabel;
-			Draw.Text( labelPos, 0f, lookLabel, TextAlign.Center );
+			Draw.Text( labelPos, lookLabel, TextAlign.Center );
 
 			// triangle arrow
 			Vector2 trianglePos = compArcOrigin + Vector2.up * ( bendRadius + 0.01f );
@@ -77,7 +77,8 @@ namespace Shapes {
 				Draw.Line( a, b, LineEndCap.None, new Color( 1, 1, 1, fade ) );
 				if( label != null ) {
 					Draw.FontSize = fontSizeTickLabel;
-					Draw.Text( b - uiDir * tickLabelOffset, uiAng - ShapesMath.TAU / 4f, label, TextAlign.Center, new Color( 1, 1, 1, fade ) );
+					Quaternion rotation = Quaternion.Euler( 0, 0, ( uiAng - ShapesMath.TAU / 4f ) * Mathf.Rad2Deg );
+					Draw.Text( b - uiDir * tickLabelOffset, rotation, label, TextAlign.Center, new Color( 1, 1, 1, fade ) );
 				}
 			}
 		}

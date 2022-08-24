@@ -13,6 +13,7 @@ namespace Shapes {
 		public static readonly int propZTestTMP = Shader.PropertyToID( "unity_GUIZTestMode" ); // TMP only
 		public static readonly int propZOffsetFactor = Shader.PropertyToID( "_ZOffsetFactor" ); // used for all shapes
 		public static readonly int propZOffsetUnits = Shader.PropertyToID( "_ZOffsetUnits" ); // used for all shapes
+		public static readonly int propColorMask = Shader.PropertyToID( "_ColorMask" ); // used for all shapes
 		public static readonly int propStencilComp = Shader.PropertyToID( "_StencilComp" ); // used for all shapes
 		public static readonly int propStencilOpPass = Shader.PropertyToID( "_StencilOpPass" ); // used for all shapes
 		public static readonly int propStencilID = Shader.PropertyToID( "_StencilID" ); // used for all shapes
