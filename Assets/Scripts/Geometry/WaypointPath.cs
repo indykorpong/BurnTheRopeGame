@@ -5,12 +5,13 @@ using UnityEngine;
 
 namespace BurnTheRope.Geometry
 {
+    /*
     // TODO: Migrate from using this to using `Path` class
     public class WaypointPath
     {
         private readonly List<Vector3> _waypoints;
-        private List<Line> _lines;          // lines to burn
-        private List<Line> _cachedLines;    // invisible lines that are not burned and are copied from `_lines`
+        private List<Line> _lines; // lines to burn
+        private List<Line> _cachedLines; // invisible lines that are not burned and are copied from `_lines`
 
         // Construct waypoint path from a list of continuous points
         // as in the line you will draw contains this list of continuous points.
@@ -27,12 +28,12 @@ namespace BurnTheRope.Geometry
         {
             _lines.Clear();
             _cachedLines.Clear();
-            
+
             for (int i = 0; i < _waypoints.Count - 1; i++)
             {
                 Line line = new Line(_waypoints[i], _waypoints[i + 1]);
                 _lines.Add(line);
-                
+
                 Line cachedLine = new Line(_waypoints[i], _waypoints[i + 1]);
                 _cachedLines.Add(cachedLine);
             }
@@ -96,7 +97,7 @@ namespace BurnTheRope.Geometry
         public void SetBurnPoint(Vector3 mousePos)
         {
             _clickPoint = mousePos;
-            
+
             (Vector3 burnPoint, int lineIndex, float distance) = GetNearestPointOnPath(_clickPoint.Value);
             if (lineIndex == -1 || distance > DISTANCE_ERROR)
             {
@@ -117,14 +118,13 @@ namespace BurnTheRope.Geometry
             _rightCurrentIndex = lineIndex + 1;
         }
 
-        /*
-         * Returns true if the click point is near the lines enough and the lines have finished burning.
-         * Returns false if the click point is too far from the lines.
-         */
+
+        // Returns true if the click point is near the lines enough and the lines have finished burning.
+        // Returns false if the click point is too far from the lines.
         public bool BurnLines()
         {
             if (_clickPoint == null) return false;
-            
+
             // Left side
             if (Vector3.Distance(_leftBurnPoint, _lines[0].start) < DIST_THRESHOLD)
             {
@@ -137,14 +137,13 @@ namespace BurnTheRope.Geometry
                     BURN_SPEED * Time.deltaTime);
                 _lines[_leftCurrentIndex].end = _leftBurnPoint;
 
-                /*
-                 * If the current burn point reached the next waypoint,
-                 * then set the position of the burn point to the position of the next waypoint,
-                 * set isVisible of the current line to false,
-                 * and decrement the current waypoint index.
-                 */
-                if (InverseLerp(_cachedLines[_leftCurrentIndex].start, _cachedLines[_leftCurrentIndex].end, _leftBurnPoint) <
-                    LEFT_THRESHOLD)
+
+                // If the current burn point reached the next waypoint,
+                // then set the position of the burn point to the position of the next waypoint,
+                // set isVisible of the current line to false,
+                // and decrement the current waypoint index.
+                if (InverseLerp(_cachedLines[_leftCurrentIndex].start, _cachedLines[_leftCurrentIndex].end,
+                        _leftBurnPoint) < LEFT_THRESHOLD)
                 {
                     _leftBurnPoint = _lines[_leftCurrentIndex].start;
                     _lines[_leftCurrentIndex].isVisible = false;
@@ -169,7 +168,8 @@ namespace BurnTheRope.Geometry
                     BURN_SPEED * Time.deltaTime);
                 _lines[_rightCurrentIndex].start = _rightBurnPoint;
 
-                if (InverseLerp(_cachedLines[_rightCurrentIndex].start, _cachedLines[_rightCurrentIndex].end, _rightBurnPoint) >
+                if (InverseLerp(_cachedLines[_rightCurrentIndex].start, _cachedLines[_rightCurrentIndex].end,
+                        _rightBurnPoint) >
                     RIGHT_THRESHOLD)
                 {
                     _rightBurnPoint = _lines[_rightCurrentIndex].end;
@@ -198,7 +198,7 @@ namespace BurnTheRope.Geometry
 
                 float t = InverseLerp(line.start, line.end, clickPoint);
                 if (t < 0 || t > 1) continue;
-                
+
                 float x1 = line.start.x;
                 float y1 = line.start.y;
                 float x2 = line.end.x;
@@ -223,14 +223,14 @@ namespace BurnTheRope.Geometry
 
             return (nearestPoint, nearestIndex, nearestDistance);
         }
-        
+
         private float InverseLerp(Vector3 a, Vector3 b, Vector3 v)
         {
             float x = Vector3.Distance(v, a);
             float y = Vector3.Distance(b, a);
             return x / y;
         }
-        
+
         public List<Vector3> GetWaypoints()
         {
             return _waypoints;
@@ -241,4 +241,5 @@ namespace BurnTheRope.Geometry
             return _lines;
         }
     }
+    */
 }
