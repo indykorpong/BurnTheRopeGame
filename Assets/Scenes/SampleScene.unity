@@ -293,7 +293,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0.97, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -424,41 +424,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lines:
   - lineIndex: 0
-    pointIndex0: 0
-    pointIndex1: 1
-    isVisible: 0
+    p0: 0
+    p1: 1
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 1
-    pointIndex1: 2
-    isVisible: 0
+    p0: 1
+    p1: 2
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 2
-    pointIndex1: 3
-    isVisible: 0
+    p0: 2
+    p1: 3
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 3
-    pointIndex1: 4
-    isVisible: 0
+    p0: 3
+    p1: 4
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 4
-    pointIndex1: 5
-    isVisible: 0
+    p0: 4
+    p1: 5
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 5
-    pointIndex1: 0
-    isVisible: 0
+    p0: 5
+    p1: 0
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 8
-    pointIndex1: 6
-    isVisible: 0
+    p0: 3
+    p1: 6
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 8
-    pointIndex1: 7
-    isVisible: 0
+    p0: 6
+    p1: 7
+    isBurning: 0
   - lineIndex: 0
-    pointIndex0: 6
-    pointIndex1: 7
-    isVisible: 0
+    p0: 3
+    p1: 7
+    isBurning: 0
   points: []
   pointsTransform: {fileID: 1346356846}
 --- !u!4 &916391306
@@ -554,7 +554,7 @@ Transform:
   m_GameObject: {fileID: 917326876}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 1}
-  m_LocalScale: {x: 20, y: 20, z: 20}
+  m_LocalScale: {x: 30, y: 30, z: 30}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -627,7 +627,6 @@ Transform:
   - {fileID: 1146625344}
   - {fileID: 178645671}
   - {fileID: 866893558}
-  - {fileID: 1858599709}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -661,35 +660,4 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1346356846}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1858599708
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1858599709}
-  m_Layer: 0
-  m_Name: Point (8)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1858599709
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1858599708}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.49, y: 0.03, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1346356846}
-  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

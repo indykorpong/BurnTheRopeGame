@@ -7,17 +7,17 @@ namespace BurnTheRope.Geometry
     public class Line
     {
         public int lineIndex;
-        public int pointIndex0;
-        public int pointIndex1;
+        public int p0;
+        public int p1;
         
-        public bool isVisible;
+        public bool isBurning;
 
-        public Line(int lineIndex, int pointIndex0, int pointIndex1)
+        public Line(int lineIndex, int p0, int p1)
         {
             this.lineIndex = lineIndex;
-            this.pointIndex0 = pointIndex0;
-            this.pointIndex1 = pointIndex1;
-            isVisible = true;
+            this.p0 = p0;
+            this.p1 = p1;
+            isBurning = false;
         }
     }
 }
