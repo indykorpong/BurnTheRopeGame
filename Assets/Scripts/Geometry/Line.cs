@@ -13,6 +13,7 @@ namespace BurnTheRope.Geometry
     public class Line
     {
         public int lineIndex;
+        public int formerLineIndex;
         public int p0;
         public int p1;
         
@@ -23,6 +24,7 @@ namespace BurnTheRope.Geometry
             this.lineIndex = lineIndex;
             this.p0 = p0;
             this.p1 = p1;
+            formerLineIndex = -1;
             lineStatus = LineStatus.NotBurned;
         }
     }

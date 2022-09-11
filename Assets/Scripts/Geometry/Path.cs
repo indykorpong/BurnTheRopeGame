@@ -40,6 +40,7 @@ namespace BurnTheRope.Geometry
             {
                 lines[i].lineIndex = i;
                 lines[i].lineStatus = LineStatus.NotBurned;
+                lines[i].formerLineIndex = -1;
 
                 int p0 = lines[i].p0;
                 int p1 = lines[i].p1;
@@ -70,6 +71,9 @@ namespace BurnTheRope.Geometry
                     (int p0, int l0, int p1, int l1) = AddPointsOnPath(pointOnPath, lineIndex);
                     _burnPointIndexToLineIndexDict.Add(p0, l0);
                     _burnPointIndexToLineIndexDict.Add(p1, l1);
+
+                    lines[l0].formerLineIndex = lineIndex;
+                    lines[l1].formerLineIndex = lineIndex;
                 }
             }
 
@@ -192,6 +196,8 @@ namespace BurnTheRope.Geometry
                     {
                         if (nextLineIndex != lineIndex && lines[nextLineIndex].lineStatus != LineStatus.IsBurned)
                         {
+                            if (lines[nextLineIndex].formerLineIndex != -1 && 
+                                lines.FindIndex(line => line.formerLineIndex == lines[nextLineIndex].formerLineIndex) != -1) continue;
                             if (_addBurnPointIndexToLineIndexDict.ContainsKey(nextPointIndex))
                             {
                                 int newBurnPointIndex = AddBurnPointOnPath(nextPointIndex, nextLineIndex);
