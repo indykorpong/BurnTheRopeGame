@@ -3,6 +3,12 @@ using UnityEngine;
 
 namespace BurnTheRope.Geometry
 {
+    public enum LineStatus
+    {
+        NotBurned,
+        IsBurning,
+        IsBurned
+    }
     [Serializable]
     public class Line
     {
@@ -10,14 +16,14 @@ namespace BurnTheRope.Geometry
         public int p0;
         public int p1;
         
-        public bool isBurning;
+        public LineStatus lineStatus;
 
         public Line(int lineIndex, int p0, int p1)
         {
             this.lineIndex = lineIndex;
             this.p0 = p0;
             this.p1 = p1;
-            isBurning = false;
+            lineStatus = LineStatus.NotBurned;
         }
     }
 }

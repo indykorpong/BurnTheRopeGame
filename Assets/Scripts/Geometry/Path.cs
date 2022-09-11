@@ -39,7 +39,7 @@ namespace BurnTheRope.Geometry
             for (int i = 0; i < lines.Count; i++)
             {
                 lines[i].lineIndex = i;
-                lines[i].isBurning = false;
+                lines[i].lineStatus = LineStatus.NotBurned;
 
                 int p0 = lines[i].p0;
                 int p1 = lines[i].p1;
@@ -75,7 +75,6 @@ namespace BurnTheRope.Geometry
 
             foreach (var kvp in _burnPointIndexToLineIndexDict)
             {
-                lines[kvp.Value].isBurning = true;
                 BurnLine(kvp.Key, kvp.Value);
             }
 
@@ -94,26 +93,19 @@ namespace BurnTheRope.Geometry
             {
                 foreach (Line line in lines)
                 {
-                    Draw.Line(points[line.p0].position, points[line.p1].position, 0.1f, Color.white);
-                }
-                
-                foreach (Point point in points)
-                {
-                    Draw.Disc(point.position, Quaternion.identity,0.15f, DiscColors.Flat(Color.blue));
-                    Draw.Text(point.position, Quaternion.identity, point.pointIndex.ToString(), Color.green);
+                    if (line.lineStatus == LineStatus.IsBurned) continue;
+                    DrawLine(line);
+                    DrawPoint(line.p0, Color.blue);
+                    DrawPoint(line.p1, Color.blue);
                 }
 
                 Draw.Disc(_mousePos, Quaternion.identity, MOUSE_CURSOR_RADIUS, DiscColors.Flat(Color.red));
 
                 foreach (var kvp in _burnPointIndexToLineIndexDict)
                 {
-                    Draw.Disc(points[kvp.Key].position, Quaternion.identity, MOUSE_CURSOR_RADIUS, DiscColors.Flat(Color.magenta));
+                    if (lines[kvp.Value].lineStatus == LineStatus.IsBurned) continue;
+                    DrawPoint(kvp.Key, Color.magenta);
                 }
-                
-                foreach (Point point in points)
-                {
-                    Draw.Text(point.position, Quaternion.identity, point.pointIndex.ToString(), Color.green);
-                } 
             }
         }
         
@@ -171,47 +163,49 @@ namespace BurnTheRope.Geometry
         
         private void BurnLine(int burnPointIndex, int lineIndex)
         {
-            if (!lines[lineIndex].isBurning) return;
+            if (lines[lineIndex].lineStatus == LineStatus.IsBurned) return;
+
+            lines[lineIndex].lineStatus = LineStatus.IsBurning;
             
             int p0 = lines[lineIndex].p0;
             int p1 = lines[lineIndex].p1;
             
-            int currentPointIndex;
             int nextPointIndex;
 
             if (p0 == burnPointIndex)
             {
-                currentPointIndex = p0;
                 nextPointIndex = p1;
             }
             else
             {
-                currentPointIndex = p1;
                 nextPointIndex = p0;
             }
             
-            Debug.Log(burnPointIndex + " " + currentPointIndex + " " + nextPointIndex);
-
             if (Vector3.Distance(points[burnPointIndex].position, points[nextPointIndex].position) < DISTANCE_THRESHOLD)
             {
                 points[burnPointIndex].position = points[nextPointIndex].position;
-                points[currentPointIndex].position = points[nextPointIndex].position;
-
-                lines[lineIndex].isBurning = false;
+                lines[lineIndex].lineStatus = LineStatus.IsBurned;
                 
                 if (points[nextPointIndex].lineIndices.Count > 0)
                 {
                     foreach (int nextLineIndex in points[nextPointIndex].lineIndices)
                     {
-                        if (nextLineIndex != lineIndex && !lines[nextLineIndex].isBurning &&
-                            !_addBurnPointIndexToLineIndexDict.ContainsKey(nextPointIndex))
+                        if (nextLineIndex != lineIndex && lines[nextLineIndex].lineStatus != LineStatus.IsBurned)
                         {
-                            _addBurnPointIndexToLineIndexDict.Add(nextPointIndex, nextLineIndex);
+                            if (_addBurnPointIndexToLineIndexDict.ContainsKey(nextPointIndex))
+                            {
+                                int newBurnPointIndex = AddBurnPointOnPath(nextPointIndex, nextLineIndex);
+                                _addBurnPointIndexToLineIndexDict.Add(newBurnPointIndex, nextLineIndex);
+                            }
+                            else
+                            {
+                                _addBurnPointIndexToLineIndexDict.Add(nextPointIndex, nextLineIndex);
+                            }
                         }
                     }
                 }
             }
-            
+
             points[burnPointIndex].position = Vector3.MoveTowards(
                 points[burnPointIndex].position,
                 points[nextPointIndex].position,
@@ -240,7 +234,6 @@ namespace BurnTheRope.Geometry
 
             int cachedLineIndex = lines[lineIndex].p0;
             lines[lineIndex].p0 = points.Count;
-            lines[lineIndex].p1 = lines[lineIndex].p1;
 
             newLines[lines.Count] = new Line(lines.Count, points.Count + 1, cachedLineIndex);
 
@@ -250,16 +243,38 @@ namespace BurnTheRope.Geometry
             return (p0, l0, p1, l1);
         }
 
-        private void OnDrawGizmos()
+        private int AddBurnPointOnPath(int nextPointIndex, int nextLineIndex)
         {
-            Vector3 offset = new Vector3(0.01f, 0.01f, 0);
-            int a = 0;
-            Handles.color = Color.red;
-            foreach (Point point in points)
+            Point[] newPoints = new Point[points.Count + 1];
+            points.CopyTo(newPoints);
+
+            int newPointIndex = points.Count;
+            newPoints[newPointIndex] = new Point(newPointIndex, points[nextPointIndex].position);
+            newPoints[newPointIndex].AddLineIndex(nextLineIndex);
+
+            if (lines[nextLineIndex].p0 == nextPointIndex)
             {
-                Handles.Label(point.position + a * offset, point.pointIndex.ToString());
-                a++;
+                lines[nextLineIndex].p0 = newPointIndex;
             }
+            else if(lines[nextLineIndex].p1 == nextPointIndex)
+            {
+                lines[nextLineIndex].p1 = newPointIndex;
+            }
+
+            points = newPoints.ToList();
+
+            return newPointIndex;
+        }
+
+        private void DrawPoint(int pointIndex, Color pointColor)
+        {
+            Draw.Disc(points[pointIndex].position, Quaternion.identity,0.15f, DiscColors.Flat(pointColor));
+            Draw.Text(points[pointIndex].position, Quaternion.identity, pointIndex.ToString(), Color.green); 
+        }
+
+        private void DrawLine(Line line)
+        {
+            Draw.Line(points[line.p0].position, points[line.p1].position, 0.1f, Color.white); 
         }
     }
 }
