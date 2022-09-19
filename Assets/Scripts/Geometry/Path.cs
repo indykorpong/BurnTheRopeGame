@@ -2,21 +2,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using Shapes;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace BurnTheRope.Geometry
 {
     [Serializable]
     public class Path : MonoBehaviour
     {
+        public Color normalPointColor;
+        public Color burnPointColor;
+        public Color lineColor;
+        public Color cursorColor;
+
         [SerializeField] private List<Line> lines;
         [SerializeField] private List<Point> points;
         [SerializeField] private Transform pointsTransform;
 
+        public List<Line> Lines
+        {
+            get => lines;
+            set => lines = value;
+        }
+
+        public List<Point> Points
+        {
+            get => points;
+            set => points = value;
+        }
+        
         private Camera _camera;
         private Vector3 _mousePos;
-        
+
         private Dictionary<int, int> _burnPointIndexToLineIndexDict;
         private Dictionary<int, int> _addBurnPointIndexToLineIndexDict;
 
@@ -60,15 +77,19 @@ namespace BurnTheRope.Geometry
 
         private void Update()
         {
+            if (GameModeButton.gameMode != GameMode.Play) return;
+            
             _mousePos = _camera.ScreenToWorldPoint(Input.mousePosition);
             _mousePos.z = 0;
+            
+            if (EventSystem.current.IsPointerOverGameObject()) return;
 
             if (Input.GetMouseButtonDown(0))
             {
-                (Vector3 pointOnPath, int lineIndex, float distance) = GetNearestPointOnPath(_mousePos);
-                if (lineIndex != -1 && distance <= DISTANCE_ERROR)
+                (Vector3 point, int lineIndex) = GetNearestPointOnPath(_mousePos);
+                if (lineIndex != -1 && lines[lineIndex].lineStatus == LineStatus.NotBurned)
                 {
-                    (int p0, int l0, int p1, int l1) = AddPointsOnPath(pointOnPath, lineIndex);
+                    (int p0, int l0, int p1, int l1) = AddPointsOnPath(point, lineIndex);
                     _burnPointIndexToLineIndexDict.Add(p0, l0);
                     _burnPointIndexToLineIndexDict.Add(p1, l1);
 
@@ -99,25 +120,28 @@ namespace BurnTheRope.Geometry
                 {
                     if (line.lineStatus == LineStatus.IsBurned) continue;
                     DrawLine(line);
-                    DrawPoint(line.p0, Color.blue);
-                    DrawPoint(line.p1, Color.blue);
+                    DrawPoint(line.p0, normalPointColor);
+                    DrawPoint(line.p1, normalPointColor);
                 }
 
-                Draw.Disc(_mousePos, Quaternion.identity, MOUSE_CURSOR_RADIUS, DiscColors.Flat(Color.red));
+                if (GameModeButton.gameMode == GameMode.Play)
+                {
+                    Draw.Disc(_mousePos, Quaternion.identity, MOUSE_CURSOR_RADIUS, DiscColors.Flat(cursorColor));
+                }
 
                 foreach (var kvp in _burnPointIndexToLineIndexDict)
                 {
                     if (lines[kvp.Value].lineStatus == LineStatus.IsBurned) continue;
-                    DrawPoint(kvp.Key, Color.magenta);
+                    DrawPoint(kvp.Key, burnPointColor);
                 }
             }
         }
         
-        private (Vector3, int, float) GetNearestPointOnPath(Vector3 mousePos)
+        public (Vector3, int) GetNearestPointOnPath(Vector3 mousePos)
         {
             float nearestDistance = float.MaxValue;
             Vector3 nearestPoint = Vector3.zero;
-            int nearestIndex = -1;
+            int nearestLineIndex = -1;
 
             for (int i = 0; i < lines.Count; i++)
             {
@@ -143,11 +167,16 @@ namespace BurnTheRope.Geometry
                 {
                     nearestDistance = distance;
                     nearestPoint = point;
-                    nearestIndex = i;
+                    nearestLineIndex = i;
                 }
             }
 
-            return (nearestPoint, nearestIndex, nearestDistance);
+            if (nearestDistance <= DISTANCE_ERROR)
+            {
+                return (nearestPoint, nearestLineIndex);
+            }
+
+            return (Vector3.zero, -1);
         }
         
         private float InverseLerp(Vector3 a, Vector3 b, Vector3 v)
@@ -162,7 +191,7 @@ namespace BurnTheRope.Geometry
             return start + (end - start) * t;
         }
 
-        private const float BURN_SPEED = 1f;
+        private const float BURN_SPEED = 4f;
         private const float DISTANCE_THRESHOLD = (float)1e-6;
         
         private void BurnLine(int burnPointIndex, int lineIndex)
@@ -275,12 +304,11 @@ namespace BurnTheRope.Geometry
         private void DrawPoint(int pointIndex, Color pointColor)
         {
             Draw.Disc(points[pointIndex].position, Quaternion.identity,0.15f, DiscColors.Flat(pointColor));
-            Draw.Text(points[pointIndex].position, Quaternion.identity, pointIndex.ToString(), Color.green); 
         }
 
         private void DrawLine(Line line)
         {
-            Draw.Line(points[line.p0].position, points[line.p1].position, 0.1f, Color.white); 
+            Draw.Line(points[line.p0].position, points[line.p1].position, 0.1f, lineColor); 
         }
     }
 }
