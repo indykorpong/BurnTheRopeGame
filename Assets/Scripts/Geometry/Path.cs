@@ -38,7 +38,8 @@ namespace BurnTheRope.Geometry
         private Dictionary<int, int> _addBurnPointIndexToLineIndexDict;
 
         private const float MOUSE_CURSOR_RADIUS = 0.15f;
-        private const float DISTANCE_ERROR = MOUSE_CURSOR_RADIUS;
+        private const float LINE_DISTANCE_ERROR = MOUSE_CURSOR_RADIUS;
+        private const float POINT_DISTANCE_ERROR = 0.05f;
 
         private void Awake()
         {
@@ -86,10 +87,11 @@ namespace BurnTheRope.Geometry
 
             if (Input.GetMouseButtonDown(0))
             {
-                (Vector3 point, int lineIndex) = GetNearestPointOnPath(_mousePos);
+                Point nearestPoint = GetNearestPointOnPath(_mousePos);
+                int lineIndex = nearestPoint.lineIndices[0];
                 if (lineIndex != -1 && lines[lineIndex].lineStatus == LineStatus.NotBurned)
                 {
-                    (int p0, int l0, int p1, int l1) = AddPointsOnPath(point, lineIndex);
+                    (int p0, int l0, int p1, int l1) = AddPointsOnPath(nearestPoint.position, lineIndex);
                     _burnPointIndexToLineIndexDict.Add(p0, l0);
                     _burnPointIndexToLineIndexDict.Add(p1, l1);
 
@@ -137,10 +139,10 @@ namespace BurnTheRope.Geometry
             }
         }
         
-        public (Vector3, int) GetNearestPointOnPath(Vector3 mousePos)
+        public Point GetNearestPointOnPath(Vector3 mousePos)
         {
             float nearestDistance = float.MaxValue;
-            Vector3 nearestPoint = Vector3.zero;
+            Vector3 nearestPosition = Vector3.zero;
             int nearestLineIndex = -1;
 
             for (int i = 0; i < lines.Count; i++)
@@ -160,23 +162,30 @@ namespace BurnTheRope.Geometry
                 float xi = x1 + (x2 - x1) * t;
                 float yi = y1 + (y2 - y1) * t;
                 float zi = mousePos.z;
-                Vector3 point = new Vector3(xi, yi, zi);
+                Vector3 position = new Vector3(xi, yi, zi);
 
-                float distance = Vector3.Distance(mousePos, point);
+                float distance = Vector3.Distance(mousePos, position);
                 if (distance < nearestDistance)
                 {
                     nearestDistance = distance;
-                    nearestPoint = point;
+                    nearestPosition = position;
                     nearestLineIndex = i;
                 }
             }
 
-            if (nearestDistance <= DISTANCE_ERROR)
+            if (nearestDistance <= LINE_DISTANCE_ERROR)
             {
-                return (nearestPoint, nearestLineIndex);
+                foreach (Point point in points)
+                {
+                    if (Vector3.Distance(point.position, nearestPosition) <= POINT_DISTANCE_ERROR)
+                    {
+                        return point;
+                    }
+                }
+                return new Point(-1, nearestPosition, new List<int>{nearestLineIndex});
             }
 
-            return (Vector3.zero, -1);
+            return new Point(-1, Vector3.zero, new List<int>{-1});
         }
         
         private float InverseLerp(Vector3 a, Vector3 b, Vector3 v)
@@ -192,7 +201,7 @@ namespace BurnTheRope.Geometry
         }
 
         private const float BURN_SPEED = 4f;
-        private const float DISTANCE_THRESHOLD = (float)1e-6;
+        private const float BURN_DISTANCE_ERROR = (float)1e-6;
         
         private void BurnLine(int burnPointIndex, int lineIndex)
         {
@@ -214,7 +223,7 @@ namespace BurnTheRope.Geometry
                 nextPointIndex = p0;
             }
             
-            if (Vector3.Distance(points[burnPointIndex].position, points[nextPointIndex].position) < DISTANCE_THRESHOLD)
+            if (Vector3.Distance(points[burnPointIndex].position, points[nextPointIndex].position) < BURN_DISTANCE_ERROR)
             {
                 points[burnPointIndex].position = points[nextPointIndex].position;
                 lines[lineIndex].lineStatus = LineStatus.IsBurned;
@@ -303,6 +312,11 @@ namespace BurnTheRope.Geometry
 
         private void DrawPoint(int pointIndex, Color pointColor)
         {
+            if (points[pointIndex].color != Color.black)
+            {
+                pointColor = points[pointIndex].color;
+            }
+            
             Draw.Disc(points[pointIndex].position, Quaternion.identity,0.15f, DiscColors.Flat(pointColor));
         }
 

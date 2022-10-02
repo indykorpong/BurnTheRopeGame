@@ -20,13 +20,7 @@ namespace BurnTheRope
         private List<Line> _extraLines;
         private List<Point> _extraPoints;
 
-        private bool _firstClickPressed;
-        private bool _secondClickPressed;
-        private bool _secondPointCreated;
-        
-        private int _firstPointIndex;
-        private int _secondPointIndex;
-        private int _extraLineIndex;
+        private int _leftClickCount = -1;
 
         private void Start()
         {
@@ -35,9 +29,6 @@ namespace BurnTheRope
 
             _extraLines = new List<Line>();
             _extraPoints = new List<Point>();
-            
-            _firstClickPressed = false;
-            _secondClickPressed = false;
             
             Camera.onPreRender += DrawExtraPath;
         }
@@ -57,72 +48,45 @@ namespace BurnTheRope
              * https://i.imgur.com/fE9VbpV.png
              */
             
-            if (Input.GetMouseButtonDown(0) && _firstClickPressed && !_secondClickPressed)
+            if (Input.GetMouseButtonDown(0))
             {
-                _secondClickPressed = true;
-
-                int newFirstPointIndex = _path.Points.Count;
-                Point firstPoint = new Point(newFirstPointIndex, _extraPoints[_firstPointIndex].position);
-                _path.Points.Add(firstPoint);
-
-                int newSecondPointIndex = newFirstPointIndex + 1;
-                Point secondPoint = new Point(newSecondPointIndex, _extraPoints[_secondPointIndex].position);
-                _path.Points.Add(secondPoint);
-
-                int newLineIndex = _path.Lines.Count;
-                Line newLine = new Line(newLineIndex, firstPoint.pointIndex, secondPoint.pointIndex);
-                _path.Lines.Add(newLine);
+                _leftClickCount++;
                 
-                _path.Points[newFirstPointIndex].lineIndices.Add(newLineIndex);
-                _path.Points[newSecondPointIndex].lineIndices.Add(newLineIndex);
-                
-                _extraPoints.Clear();
-                _extraLines.Clear();
-            }
-            
-            if (Input.GetMouseButtonDown(0) && !_firstClickPressed && !_secondClickPressed)
-            {
-                _firstClickPressed = true;
-
-                _firstPointIndex = _extraPoints.Count;
-                (Vector3 pointPosition, int lineIndex) = _path.GetNearestPointOnPath(_mousePos);
-                if (lineIndex != -1)
+                Point nearestPoint = _path.GetNearestPointOnPath(_mousePos);
+                if (nearestPoint.pointIndex != -1)
                 {
-                    Point point = new Point(_firstPointIndex, pointPosition);
-                    _extraPoints.Add(point);
+                    Point pointOnExistingPath = _path.Points[nearestPoint.pointIndex];
+                    pointOnExistingPath.color = extraPointColor;
+                    pointOnExistingPath.isExtraPointTheSamePosition = true;
+                    
+                    _extraPoints.Add(pointOnExistingPath);
                 }
                 else
                 {
-                    Point point = new Point(_firstPointIndex, _mousePos);
-                    _extraPoints.Add(point);
+                    Point extraPoint = new Point(
+                        _extraPoints.Count,
+                        nearestPoint.position,
+                        new List<int> { _extraLines.Count },
+                        extraPointColor);
+                    _extraPoints.Add(extraPoint);
                 }
             }
-            
-            if (_firstClickPressed && _secondClickPressed)
+            else if (Input.GetMouseButtonDown(1))
             {
-                _firstClickPressed = false;
-                _secondClickPressed = false;
-                _secondPointCreated = false;
+                _leftClickCount = -1;
             }
 
-            if (_firstClickPressed && !_secondPointCreated)
+            if (_leftClickCount == 0)
             {
-                _secondPointCreated = true;
-                
-                _secondPointIndex = _firstPointIndex + 1;
-                Point point = new Point(_secondPointIndex, _mousePos);
-                _extraPoints.Add(point);
+                // TODO: edit the following line to update the position of _extraPoints[^1] instead of creating it every frame
+                Point drawingPoint = new Point(_extraPoints.Count, _mousePos);
+                drawingPoint.AddLineIndex(_extraLines.Count);
 
-                _extraLineIndex = _extraLines.Count;
-                Line line = new Line(_extraLineIndex, _firstPointIndex, _secondPointIndex);
-                _extraLines.Add(line);
-                
-                _extraPoints[_firstPointIndex].lineIndices.Add(_extraLineIndex);
-                _extraPoints[_secondPointIndex].lineIndices.Add(_extraLineIndex);
-            }
-            else if (_firstClickPressed && _secondPointCreated)
-            {
-                _extraPoints[_secondPointIndex].position = _mousePos;
+                _extraPoints.Add(drawingPoint);
+
+                // TODO: edit the following lines not to create a new line every frame
+                Line drawingLine = new Line(_extraLines.Count, _extraPoints[^2].pointIndex, _extraPoints[^1].pointIndex);
+                _extraLines.Add(drawingLine);
             }
         }
 
